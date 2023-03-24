@@ -1,21 +1,31 @@
 import numpy as np
+import os
+import random
 
-#def activation(x):
-#	return 1/(1 + np.exp(-x))
 def activation(x):
 	if x >= 0 and x <= 1:
 		return x
 	elif x < 0:
-		return 0.0001 * x
+		return 0.005 * x
 	else:
-		return 1 + 0.0001 * (x - 1)
+		return 1 + 0.005 * (x - 1)
 
 def deriv_activ(x):
 	if x >= 0 and x <= 1:
 		return 1
 	else:
-		return 0.0001
-	
+		return 0.005
+
+images = []
+
+tmp = os.listdir("./y_train/")
+print(tmp)
+for i in tmp:
+	images.append(i[:-4])
+print(images)
+
+def get_random_image():
+	return random.choice(images)
 
 def get_delta_error(right_out, y_out):
 	return (y_out - right_out) * deriv_activ(y_out)
@@ -45,12 +55,11 @@ def create_output_pixels(path):
 			if(pixels[j, i][0] == 255):
 				output_pixels.append(0)
 			else:
-				output_pixels.append(1)
+				output_pixels.append(255)
 
 	return output_pixels
 
-#print(create_input_pixels("./changes_origin_images_4824/IMG_1089.JPG"))
-#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
+
 
 
 l_rate = 0.01
@@ -85,7 +94,7 @@ for i in range(1152):
 layers.append(tmp_mass)
 
 tmp_mass = []
-for i in range(10000):
+for i in range(1500):
 	tmp_mass.append(0)
 layers.append(tmp_mass)
 
@@ -104,8 +113,6 @@ for i in range(4):
 	print("	", i, len(layers[i]))
 
 weights = []
-
-import random
 
 tmp_mass = []
 for i in range(len(layers[1])):
@@ -153,12 +160,12 @@ def back_evolve(right_out):
 	for i in range(len(layers[3])):
 		weights_out_delta.append((layers[3][i] - right_out[i]) * deriv_activ(layers[3][i]))
 
-	print(weights_out_delta)
+	#print(weights_out_delta)
 	#print(weights_out_delta)
 	#input()
 	for i in range(len(weights[2])):
 		for j in range(len(weights[2][i])):
-			weights[2][i][j] = weights[2][i][j] - layers[2][j] * weights_out_delta[i] * l_rate
+			weights[2][i][j] = weights[2][i][j] - layers[3][j] * weights_out_delta[i] * l_rate
 	'''
 	print("\n weights")
 	for i in weights:
@@ -174,8 +181,8 @@ def back_evolve(right_out):
 			tmp_error += weights[2][j][i] * weights_out_delta[j]
 		delta_w_layer_3.append(tmp_error * deriv_activ(layers[2][i]))
 
-	print("delta w 3 layer")
-	print(delta_w_layer_3)
+	#print("delta w 3 layer")
+	#print(delta_w_layer_3)
 	#input()
 	for i in range(len(weights[1])):
 		for j in range(len(weights[1][i])):
@@ -189,19 +196,21 @@ def back_evolve(right_out):
 			tmp_error += weights[1][j][i] * delta_w_layer_3[j]
 		delta_w_layer_2.append(tmp_error * deriv_activ(layers[1][i]))
 
-	print("delta w 2 layer")
-	print(delta_w_layer_2)
+	#print("delta w 2 layer")
+	#print(delta_w_layer_2)
 	#input()
 	for i in range(len(weights[0])):
 		for j in range(len(weights[0][i])):
 			#print(layers[0][j])
 			weights[0][i][j] = weights[0][i][j] - layers[0][j] * delta_w_layer_2[i] * l_rate
 
-for i in range(20):
+for i in range(500):
 	print(i)
-	layers[0] = create_input_pixels("./test.jpg")
+	image = get_random_image()
+	print(image)
+	layers[0] = create_input_pixels("./x_train_4824_old/"+image+".JPG")
 	#print("layer 0", layers[0])
-	
+
 	layer_evolve(layers[0], layers[1], weights[0])
 	#print("layer 0 after evolve", layers[0])
 	#print("layer 1", layers[1])
@@ -209,76 +218,38 @@ for i in range(20):
 	#print("layer 1 after evolve", layers[1])
 	#print("layer 2", layers[2])
 	layer_evolve(layers[2], layers[3], weights[2])
-	#print("layer 3", layers[3])
-	
+	print("layer 3", layers[3][0])
+
 	#print(layers[2])
 	#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
-	back_evolve(create_output_pixels("./testm.bmp"))
+	back_evolve(create_output_pixels("./y_train/"+image+".bmp"))
+	print(weights[0][1][0])
+	if(i % 10 == 0):
+		#print(layers[3])
+		for i in range(24):
+			string = ""
+			for j in range(48):
+				#print(mass[32 * i + j])
+				if float(layers[3][48 * i + j]) >= 128:
+					string += str("1")
+				else:
+					string += str("0")
+			print(string)
 
-layers[0] = create_input_pixels("./test.jpg")
+layers[0] = create_input_pixels("./x_train_4824_old/IMG_1150.JPG")
 layer_evolve(layers[0], layers[1], weights[0])
 layer_evolve(layers[1], layers[2], weights[1])
 layer_evolve(layers[2], layers[3], weights[2])
 
 print(layers[3])
-#print(type(layers[3][0]))
-#nput()
+for i in range(24):
+	string = ""
+	for j in range(48):
+		#print(mass[32 * i + j])
+		if float(layers[3][48 * i + j]) >= 128:
+			string += str("1")
+		else:
+			string += str("0")
+	print(string)
 
-#print(layers[2])
-#print(type(layers[2][0]))
-#input()
-
-#print(layers[1])
-#print(type(layers[1][0]))
-#input()
-
-
-#print(layers[0])
-#print(type(layers[0][0]))
-#input()
-'''
-layer_evolve(layers[0], layers[1], weights[0])
-layer_evolve(layers[1], layers[2], weights[1])
-print(layers)
-
-
-right_out = [0, 1]
-weights_out_delta = []
-
-for i in range(len(layers[2])):
-	weights_out_delta.append((layers[2][i] - right_out[i]) * layers[2][i] * (1 - layers[2][i]))
-
-print(weights_out_delta)
-
-for i in range(len(weights[1])):
-	for j in range(len(weights[1][i])):
-		weights[1][i][j] = weights[1][i][j] - layers[1][j] * weights_out_delta[i] * l_rate
-
-print("\n weights")
-for i in weights:
-	for j in i:
-		print(j)
-	print("\n")
-
-delta_w_layer_2 = []
-for i in range(len(layers[1])):
-	tmp_error = 0
-	for j in range(len(weights_out_delta)):
-		tmp_error += weights[1][j][i] * weights_out_delta[j]
-	delta_w_layer_2.append(tmp_error * layers[1][i] * (1 - layers[1][i]))
-
-print("delta w 2 layer")
-print(delta_w_layer_2)
-
-for i in range(len(weights[0])):
-	for j in range(len(weights[0][i])):
-		#print(layers[0][j])
-		weights[0][i][j] = weights[0][i][j] - layers[0][j] * delta_w_layer_2[i] * l_rate
-
-
-print("\n weights")
-for i in weights:
-	for j in i:
-		print(j)
-	print("\n")
-'''
+print("\n")
