@@ -1,6 +1,8 @@
 import numpy as np
 import os
 import random
+import multiprocessing
+
 
 def activation(x):
 	if x >= 0 and x <= 1:
@@ -142,15 +144,29 @@ print(len(weights))
 print(len(weights[0]))
 print(len(weights[0][0]))
 
-def layer_evolve(input_layer, current_layer, w):
-	for i in range(len(w)):
-		summary = 0
-		for j in range(len(w[i])):
-			summary += input_layer[j] * w[i][j]
-			#print(i, j, input_layer[j], w[i][j])
-			#print(input_layer[j] * w[i][j])
-		#print(summary)
-		current_layer[i] = activation(summary)
+def layer_evolve(input_layer, current_layer, w, start, step):
+    for i in range(start, len(w), step):
+        summary = 0
+        if(start == 1):
+            print(start, i)
+        for j in range(len(w[i])):
+            summary += input_layer[j] * w[i][j]
+            #print(i, j, input_layer[j], w[i][j])
+            #print(input_layer[j] * w[i][j])
+            #print(summary)
+        current_layer[i] = activation(summary)
+        #print(start)
+
+def create_threads(num, input_layer, current_layer, w):
+    processes = []
+    for i in range(num):
+        processes.append(multiprocessing.Process(target=layer_evolve, args=(input_layer, current_layer, w, i, num)))
+
+    for thread in processes:
+        thread.start()  # каждый поток должен быть запущен
+    for thread in processes:
+        thread.join()
+
 
 
 def back_evolve(right_out):
@@ -211,13 +227,17 @@ for i in range(100):
 	layers[0] = create_input_pixels("./changes_origin_images_4824/IMG_1089.JPG")#("./x_train_4824_old/"+image+".JPG")
 	#print("layer 0", layers[0])
 
-	layer_evolve(layers[0], layers[1], weights[0])
+	#layer_evolve(layers[0], layers[1], weights[0])
 	#print("layer 0 after evolve", layers[0])
 	#print("layer 1", layers[1])
-	layer_evolve(layers[1], layers[2], weights[1])
+	#layer_evolve(layers[1], layers[2], weights[1])
 	#print("layer 1 after evolve", layers[1])
 	#print("layer 2", layers[2])
-	layer_evolve(layers[2], layers[3], weights[2])
+	#layer_evolve(layers[2], layers[3], weights[2])
+
+	create_threads(10,layers[0], layers[1], weights[0])
+	create_threads(10,layers[1], layers[2], weights[1])
+	create_threads(10,layers[2], layers[3], weights[2])
 	print("layer 3", layers[3][0])
 
 	#print(layers[2])
