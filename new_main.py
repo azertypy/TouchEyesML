@@ -94,12 +94,12 @@ for i in range(1152):
 layers.append(tmp_mass)
 
 tmp_mass = []
-for i in range(1500):
+for i in range(1900):
 	tmp_mass.append(0)
 layers.append(tmp_mass)
 
 tmp_mass = []
-for i in range(500):
+for i in range(400):
 	tmp_mass.append(0)
 layers.append(tmp_mass)
 
@@ -204,13 +204,14 @@ def back_evolve(right_out):
 			#print(layers[0][j])
 			weights[0][i][j] = weights[0][i][j] - layers[0][j] * delta_w_layer_2[i] * l_rate
 
+import time
 for i in range(100):
 	print(i)
 	image = get_random_image()
 	print(image)
 	layers[0] = create_input_pixels("./changes_origin_images_4824/IMG_1089.JPG")#("./x_train_4824_old/"+image+".JPG")
 	#print("layer 0", layers[0])
-
+	s_t = time.time()
 	layer_evolve(layers[0], layers[1], weights[0])
 	#print("layer 0 after evolve", layers[0])
 	#print("layer 1", layers[1])
@@ -220,6 +221,7 @@ for i in range(100):
 	layer_evolve(layers[2], layers[3], weights[2])
 	print("layer 3", layers[3][0])
 
+	print("time", time.time()- s_t)
 	#print(layers[2])
 	#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
 	back_evolve(create_output_pixels("./x_train_4824/IMG_1089.BMP"))

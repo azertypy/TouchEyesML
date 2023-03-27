@@ -147,8 +147,8 @@ print(len(weights[0][0]))
 def layer_evolve(input_layer, current_layer, w, start, step):
     for i in range(start, len(w), step):
         summary = 0
-        if(start == 1):
-            print(start, i)
+        #if(start == 1):
+        #    print(start, i)
         for j in range(len(w[i])):
             summary += input_layer[j] * w[i][j]
             #print(i, j, input_layer[j], w[i][j])
