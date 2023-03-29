@@ -18,14 +18,14 @@ def deriv_activ(x):
 
 images = []
 
-tmp = os.listdir("./y_train/")
-print(tmp)
-for i in tmp:
-	images.append(i[:-4])
-print(images)
+#tmp = os.listdir("./y_train/")
+#print(tmp)
+#for i in tmp:
+#	images.append(i[:-4])
+#print(images)
 
-def get_random_image():
-	return random.choice(images)
+#def get_random_image():
+#	return random.choice(images)
 
 def get_delta_error(right_out, y_out):
 	return (y_out - right_out) * deriv_activ(y_out)
@@ -94,7 +94,7 @@ for i in range(1152):
 layers.append(tmp_mass)
 
 tmp_mass = []
-for i in range(1900):
+for i in range(1200):
 	tmp_mass.append(0)
 layers.append(tmp_mass)
 
@@ -207,9 +207,9 @@ def back_evolve(right_out):
 import time
 for i in range(100):
 	print(i)
-	image = get_random_image()
-	print(image)
-	layers[0] = create_input_pixels("./changes_origin_images_4824/IMG_1089.JPG")#("./x_train_4824_old/"+image+".JPG")
+	#image = get_random_image()
+	#print(image)
+	layers[0] = create_input_pixels("./test_input.JPG")#("./x_train_4824_old/"+image+".JPG")
 	#print("layer 0", layers[0])
 	s_t = time.time()
 	layer_evolve(layers[0], layers[1], weights[0])
@@ -224,7 +224,7 @@ for i in range(100):
 	print("time", time.time()- s_t)
 	#print(layers[2])
 	#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
-	back_evolve(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
+	back_evolve(create_output_pixels("./test_output.BMP"))
 	print(weights[0][1][0])
 	if(i % 10 == 0):
 		#print(layers[3])
