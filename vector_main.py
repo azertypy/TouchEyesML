@@ -6,17 +6,26 @@ def activation(x):
 	if x >= 0 and x <= 1:
 		return x
 	elif x < 0:
-		return 0.005 * x
+		return 0.002 * x
 	else:
-		return 1 + 0.005 * (x - 1)
+		return 1 + 0.002 * (x - 1)
 
 def deriv_activ(x):
 	if x >= 0 and x <= 1:
 		return 1
 	else:
-		return 0.005
+		return 0.002
 
 images = []
+tmp = os.listdir("./y_train/")
+print(tmp)
+for i in tmp:
+	images.append(i[:-4])
+print(images)
+
+def get_random_image():
+	return random.choice(images)
+
 
 def get_delta_error(right_out, y_out):
 	return (y_out - right_out) * deriv_activ(y_out)
@@ -265,7 +274,7 @@ def back_evolve(right_out):
 	#print(delta_w_layer_3)
 	#input()
 	for i in range(len(weights[1])):
-		for j in range(len(weights[1][i])):
+		for j in range(len(layers[2])):
 			#print(layers[0][j])
 			weights[1][i][j] = weights[1][i][j] - layers[1][j] * delta_w_layer_3[i] * l_rate
 
@@ -280,17 +289,21 @@ def back_evolve(right_out):
 	#print(delta_w_layer_2)
 	#input()
 	for i in range(len(weights[0])):
-		for j in range(len(weights[0][i])):
+		for j in range(len(layers[1])):
 			#print(layers[0][j])
 			weights[0][i][j] = weights[0][i][j] - layers[0][j] * delta_w_layer_2[i] * l_rate
 
 import time
-epoches = 100
+import math
+epoches = int(input("SET NUM OF EPOCHES"))
+last_weights = weights
+pre_last_weights = weights
+num_of_nan = 0
 for i in range(epoches):
 	print(i)
-	#image = get_random_image()
-	#print(image)
-	layers[0] = create_input_pixels("./test_input.JPG")#("./x_train_4824_old/"+image+".JPG")
+	image = get_random_image()
+	print(image)
+	layers[0] = create_input_pixels("./x_train_4824_old/"+image+".JPG")
 	#print("layer 0", layers[0])
 	s_t = time.time()
 	layer_evolve(layers[0], layers[1], weights[0])
@@ -300,12 +313,27 @@ for i in range(epoches):
 	#print("layer 1 after evolve", layers[1])
 	#print("layer 2", layers[2])
 	layer_evolve(layers[2], layers[3], weights[2])
+	if num_of_nan == 2:
+		print("ERROR: Double NaN found. Load pre-last numeric weights")
+		weights = pre_last_weights
+		print("layer 3 0", layers[3][0])
+		continue
+	if(math.isnan(layers[3][0]) or layers[3][0] > 3000 or layers[3][0] < -3000):
+		print("ERROR: Weights is NaN or over 3000 found. Load last numeric weights")
+		weights = last_weights
+		num_of_nan += 1
+		print("layer 3 0", layers[3][0])
+		continue
+
+	num_of_nan = 0
+	pre_last_weights = last_weights
+	last_weights = weights
 	print("layer 3 0", layers[3][0])
 
 	print("time", time.time()- s_t)
 	#print(layers[2])
 	#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
-	back_evolve(create_output_pixels("./test_output.BMP"))
+	back_evolve(create_output_pixels("./y_train/" + image + ".BMP"))
 	print("complete", i / epoches * 100, "%")
 	if(i % 10 == 0):
 		pass#print(layers[3])
@@ -319,85 +347,98 @@ for i in range(epoches):
 					string += str("0")
 			print(string)'''
 
-layers[0] = create_input_pixels("./test_input.JPG")
-layer_evolve(layers[0], layers[1], weights[0])
-layer_evolve(layers[1], layers[2], weights[1])
-layer_evolve(layers[2], layers[3], weights[2])
+def test_neural(path):
+	layers[0] = create_input_pixels(path)
+	layer_evolve(layers[0], layers[1], weights[0])
+	layer_evolve(layers[1], layers[2], weights[1])
+	layer_evolve(layers[2], layers[3], weights[2])
 
-matrix = {"0" :  [0, 0, 0, 0],
-          '1' :  [1, 0, 0, 0],
-          '2' :  [0, 1, 0, 0],
-          '3' :  [0, 0, 1, 0],
-          '4' :  [0, 0, 0, 1],
-          '5' :  [1, 1, 0, 0],
-          '6' :  [1, 0, 1, 0],
-          '7' :  [1, 0, 0, 1],
-          '8' :  [0, 1, 1, 0],
-          '9':  [0, 1, 0, 1],
-          'a':  [0, 0, 1, 1],
-          'b':  [1, 1, 1, 0],
-          'c':  [1, 1, 0, 1],
-          'd':  [1, 0, 1, 1],
-          'e':  [0, 1, 1, 1],
-          'f':  [1, 1, 1, 1]}
+	matrix = {"0" :  [0, 0, 0, 0],
+	          '1' :  [1, 0, 0, 0],
+	          '2' :  [0, 1, 0, 0],
+	          '3' :  [0, 0, 1, 0],
+	          '4' :  [0, 0, 0, 1],
+	          '5' :  [1, 1, 0, 0],
+	          '6' :  [1, 0, 1, 0],
+	          '7' :  [1, 0, 0, 1],
+	          '8' :  [0, 1, 1, 0],
+	          '9':  [0, 1, 0, 1],
+	          'a':  [0, 0, 1, 1],
+	          'b':  [1, 1, 1, 0],
+	          'c':  [1, 1, 0, 1],
+	          'd':  [1, 0, 1, 1],
+	          'e':  [0, 1, 1, 1],
+	          'f':  [1, 1, 1, 1]}
+	print(layers[3])
+	for i in range(24):
+		string = ""
+		for j in range(12):
+			x = layers[3][12 * i + j]
+			if(x <= 50):
+				data = matrix["0"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 50 and x <= 150):
+				data = matrix["1"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 150 and x <= 250):
+				data = matrix["2"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 250 and x <= 350):
+				data = matrix["3"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
 
-print(layers[3])
-for i in range(24):
-	string = ""
-	for j in range(12):
-		x = layers[3][12 * i + j]
-		if(x <= 50):
-			data = matrix["0"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 50 and x <= 150):
-			data = matrix["1"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 150 and x <= 250):
-			data = matrix["2"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 250 and x <= 350):
-			data = matrix["3"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 350 and x <= 450):
+				data = matrix["4"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 450 and x <= 550):
+				data = matrix["5"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 550 and x <= 650):
+				data = matrix["6"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 650 and x <= 750):
+				data = matrix["7"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
 
-		elif(x > 350 and x <= 450):
-			data = matrix["4"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 450 and x <= 550):
-			data = matrix["5"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 550 and x <= 650):
-			data = matrix["6"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 650 and x <= 750):
-			data = matrix["7"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 750 and x <= 850):
+				data = matrix["8"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 850 and x <= 950):
+				data = matrix["9"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 950 and x <= 1050):
+				data = matrix["a"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 1050 and x <= 1150):
+				data = matrix["b"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
 
-		elif(x > 750 and x <= 850):
-			data = matrix["8"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 850 and x <= 950):
-			data = matrix["9"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 950 and x <= 1050):
-			data = matrix["a"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 1050 and x <= 1150):
-			data = matrix["b"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 1150 and x <= 1250):
+				data = matrix["c"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 1250 and x <= 1350):
+				data = matrix["d"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 1350 and x <= 1450):
+				data = matrix["e"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+			elif(x > 1450):
+				data = matrix["f"]
+				string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
 
-		elif(x > 1150 and x <= 1250):
-			data = matrix["c"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 1250 and x <= 1350):
-			data = matrix["d"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 1350 and x <= 1450):
-			data = matrix["e"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
-		elif(x > 1450):
-			data = matrix["f"]
-			string += str(data[0]) + str(data[1]) + str(data[2])+ str(data[3])
+		print(string)
 
-	print(string)
+	print("\n")
 
+img = get_random_image()
+print(img)
+test_neural("./x_train_4824_old/" + img + ".JPG")
+print("\n")
+img = get_random_image()
+print(img)
+test_neural("./x_train_4824_old/" + img + ".JPG")
+print("\n")
+img = get_random_image()
+print(img)
+test_neural("./x_train_4824_old/" + img + ".JPG")
 print("\n")
