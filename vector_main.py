@@ -285,7 +285,8 @@ def back_evolve(right_out):
 			weights[0][i][j] = weights[0][i][j] - layers[0][j] * delta_w_layer_2[i] * l_rate
 
 import time
-for i in range(100):
+epoches = 100
+for i in range(epoches):
 	print(i)
 	#image = get_random_image()
 	#print(image)
@@ -299,13 +300,13 @@ for i in range(100):
 	#print("layer 1 after evolve", layers[1])
 	#print("layer 2", layers[2])
 	layer_evolve(layers[2], layers[3], weights[2])
-	print("layer 3", layers[3][0])
+	print("layer 3 0", layers[3][0])
 
 	print("time", time.time()- s_t)
 	#print(layers[2])
 	#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
 	back_evolve(create_output_pixels("./test_output.BMP"))
-	print(weights[0][1][0])
+	print("complete", i / epoches * 100, "%")
 	if(i % 10 == 0):
 		pass#print(layers[3])
 		'''for i in range(24):
