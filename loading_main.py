@@ -133,6 +133,8 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate = 0.0008),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+model.load_weights("Weights")
+
 matrix = {"0" :  [0, 0, 0, 0],
 		  '1' :  [1, 0, 0, 0],
 		  '2' :  [0, 1, 0, 0],

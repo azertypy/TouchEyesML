@@ -67,6 +67,8 @@ for i in range(0, 24):
         elif(input_pixels[48 * i + j] == 0 and input_pixels[48 * i + j + 1] == 1 and input_pixels[48 * i + j + 2] == 1 and input_pixels[48 * i + j + 3] == 1): tmp_mass.append("e")
         elif(input_pixels[48 * i + j] == 1 and input_pixels[48 * i + j + 1] == 1 and input_pixels[48 * i + j + 2] == 1 and input_pixels[48 * i + j + 3] == 1): tmp_mass.append("f")
 
+
+
 out_mass = []
 for i in range(24 * 12):
     data = matrix[tmp_mass[i]]
@@ -75,11 +77,11 @@ for i in range(24 * 12):
     out_mass.append(data[2])
     out_mass.append(data[3])
 
-for i in range(24):
+for i in range(12):
     s = ""
-    for j in range(12):
-        s += str(out_mass[i * 24 + j])
-    #print(s)
+    for j in range(24):
+        s += str(tmp_mass[i * 12 + j])
+    print(s)
 
 out_mass_nums = []
 for i in range(24 * 12):

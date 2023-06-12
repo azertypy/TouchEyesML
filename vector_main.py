@@ -151,7 +151,7 @@ def create_output_pixels(path):
 
 
 
-l_rate = 0.01
+l_rate = 0.001
 '''
 layers = [
 			[1, 1],
@@ -298,11 +298,12 @@ import math
 epoches = int(input("SET NUM OF EPOCHES"))
 last_weights = weights
 pre_last_weights = weights
+weights_backup = []
 num_of_nan = 0
 for i in range(epoches):
-	print(i)
+	#print(i)
 	image = get_random_image()
-	print(image)
+	#print(image)
 	layers[0] = create_input_pixels("./x_train_4824_old/"+image+".JPG")
 	#print("layer 0", layers[0])
 	s_t = time.time()
@@ -313,14 +314,21 @@ for i in range(epoches):
 	#print("layer 1 after evolve", layers[1])
 	#print("layer 2", layers[2])
 	layer_evolve(layers[2], layers[3], weights[2])
+
 	if num_of_nan == 2:
 		print("ERROR: Double NaN found. Load pre-last numeric weights")
 		weights = pre_last_weights
 		print("layer 3 0", layers[3][0])
+		for i in range(0, len(weights_backup), -1):
+			if(not(math.nan in weights_backup[i])):
+				weights = weights_backup[i]
 		continue
-	if(math.isnan(layers[3][0]) or layers[3][0] > 3000 or layers[3][0] < -3000):
+	if(math.isnan(layers[3][0]) or layers[3][0] > 1700 or layers[3][0] < -100):
 		print("ERROR: Weights is NaN or over 3000 found. Load last numeric weights")
-		weights = last_weights
+		for i in range(0, len(weights_backup), -1):
+			if(not(math.nan in weights_backup[i])):
+				weights = weights_backup[i]
+		continue
 		num_of_nan += 1
 		print("layer 3 0", layers[3][0])
 		continue
@@ -328,13 +336,15 @@ for i in range(epoches):
 	num_of_nan = 0
 	pre_last_weights = last_weights
 	last_weights = weights
-	print("layer 3 0", layers[3][0])
-
-	print("time", time.time()- s_t)
+	if(i % 100 == 0):
+		weights_backup.append(weights)
+	t_s = time.time()- s_t
 	#print(layers[2])
 	#print(create_output_pixels("./x_train_4824/IMG_1089.BMP"))
 	back_evolve(create_output_pixels("./y_train/" + image + ".BMP"))
-	print("complete", i / epoches * 100, "%")
+	#print("complete", i / epoches * 100, "%")
+	print("\n", i, image, ", evole time = ", t_s, ", back_evolve time = ", time.time() - s_t, ", complete", i / epoches * 100, "%")
+	print("	layer 3 0", layers[3][0])
 	if(i % 10 == 0):
 		pass#print(layers[3])
 		'''for i in range(24):
